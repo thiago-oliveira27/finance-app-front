@@ -2,26 +2,36 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Wallet, Target, FileText, Settings, TrendingUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { BarChart3, Wallet, FileText, Settings, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { logout, getUser } from "@/lib/auth"
 
 const NAV_ITEMS = [
-  { href: "/", icon: BarChart3, label: "Dashboard" },
-  { href: "/transactions", icon: Wallet, label: "Transactions" },
-  { href: "/budgets", icon: TrendingUp, label: "Budgets" },
-  { href: "/goals", icon: Target, label: "Goals" },
-  { href: "/reports", icon: FileText, label: "Reports" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/", icon: BarChart3, label: "Painel" },
+  { href: "/transactions", icon: Wallet, label: "Transacoes" },
+  { href: "/reports", icon: FileText, label: "Relatorios" },
+  { href: "/settings", icon: Settings, label: "Configuracoes" },
 ]
 
 export function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
+  const user = getUser()
+
+  function handleLogout() {
+    logout()
+    router.push("/login")
+  }
 
   return (
     <nav className="border-r border-border bg-card">
       <div className="flex flex-col h-screen">
         <div className="p-6 border-b border-border">
           <h1 className="text-2xl font-bold text-foreground">FinPlan</h1>
+          {user && (
+            <p className="text-sm text-muted-foreground mt-1 truncate">{user.nome}</p>
+          )}
         </div>
         <div className="flex-1 overflow-auto">
           <ul className="space-y-2 p-4">
@@ -40,6 +50,15 @@ export function Navigation() {
               </li>
             ))}
           </ul>
+        </div>
+        <div className="p-4 border-t border-border">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-foreground hover:bg-destructive/10 hover:text-destructive w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="hidden md:inline">Sair</span>
+          </button>
         </div>
       </div>
     </nav>

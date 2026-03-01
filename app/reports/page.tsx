@@ -6,20 +6,21 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { Download } from "lucide-react"
+import { AuthGuard } from "@/components/auth-guard"
 
 export default function ReportsPage() {
   const { data } = useFinancial()
 
   const monthlyData = [
     { month: "Jan", income: 4800, expenses: 2400, savings: 2400 },
-    { month: "Feb", income: 5200, expenses: 2800, savings: 2400 },
+    { month: "Fev", income: 5200, expenses: 2800, savings: 2400 },
     { month: "Mar", income: 4900, expenses: 2900, savings: 2000 },
-    { month: "Apr", income: 5000, expenses: 2600, savings: 2400 },
-    { month: "May", income: 5100, expenses: 2200, savings: 2900 },
+    { month: "Abr", income: 5000, expenses: 2600, savings: 2400 },
+    { month: "Mai", income: 5100, expenses: 2200, savings: 2900 },
   ]
 
   const handleExportCSV = () => {
-    const headers = ["Date", "Type", "Category", "Amount", "Description"]
+    const headers = ["Data", "Tipo", "Categoria", "Valor", "Descricao"]
     const rows =
       data?.transactions.map((t) => [
         new Date(t.date).toLocaleDateString(),
@@ -34,29 +35,30 @@ export default function ReportsPage() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "transactions.csv"
+    a.download = "transacoes.csv"
     a.click()
   }
 
   return (
+    <AuthGuard>
     <div className="flex h-screen bg-background">
       <Navigation />
       <main className="flex-1 overflow-auto">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-3xl font-bold">Reports</h2>
-              <p className="text-muted-foreground mt-1">Analyze your financial data</p>
+              <h2 className="text-3xl font-bold">Relatorios</h2>
+              <p className="text-muted-foreground mt-1">Analise seus dados financeiros</p>
             </div>
             <Button onClick={handleExportCSV} className="gap-2">
               <Download className="w-4 h-4" />
-              Export CSV
+              Exportar CSV
             </Button>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Monthly Trends</h3>
+              <h3 className="text-lg font-semibold mb-4">Tendencias Mensais</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -71,7 +73,7 @@ export default function ReportsPage() {
             </Card>
 
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Monthly Comparison</h3>
+              <h3 className="text-lg font-semibold mb-4">Comparacao Mensal</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -88,5 +90,6 @@ export default function ReportsPage() {
         </div>
       </main>
     </div>
+    </AuthGuard>
   )
 }

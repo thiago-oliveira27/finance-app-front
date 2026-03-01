@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, Search } from "lucide-react"
 import { CATEGORIES } from "@/lib/constants"
+import { AuthGuard } from "@/components/auth-guard"
 
 export default function TransactionsPage() {
   const { data, deleteTransaction, addTransaction } = useFinancial()
@@ -27,18 +28,19 @@ export default function TransactionsPage() {
     }) || []
 
   return (
+    <AuthGuard>
     <div className="flex h-screen bg-background">
       <Navigation />
       <main className="flex-1 overflow-auto">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-3xl font-bold">Transactions</h2>
-              <p className="text-muted-foreground mt-1">Manage and track all your transactions</p>
+              <h2 className="text-3xl font-bold">Transacoes</h2>
+              <p className="text-muted-foreground mt-1">Gerencie e acompanhe todas as suas transacoes</p>
             </div>
             <Button onClick={() => setModalOpen(true)} className="gap-2">
               <Plus className="w-4 h-4" />
-              Add Transaction
+              Nova Transacao
             </Button>
           </div>
 
@@ -48,7 +50,7 @@ export default function TransactionsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search transactions..."
+                  placeholder="Buscar transacoes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -59,9 +61,9 @@ export default function TransactionsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="all">Todos os Tipos</SelectItem>
+                  <SelectItem value="income">Receita</SelectItem>
+                  <SelectItem value="expense">Despesa</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={filterCategory} onValueChange={setFilterCategory}>
@@ -69,7 +71,7 @@ export default function TransactionsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">Todas as Categorias</SelectItem>
                   {CATEGORIES.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.icon} {cat.name}
@@ -84,7 +86,7 @@ export default function TransactionsPage() {
           <Card>
             <div className="divide-y">
               {filtered.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">No transactions found</div>
+                <div className="p-8 text-center text-muted-foreground">Nenhuma transacao encontrada</div>
               ) : (
                 filtered.map((transaction) => (
                   <div
@@ -98,7 +100,7 @@ export default function TransactionsPage() {
                       <div>
                         <p className="font-semibold">{transaction.description}</p>
                         <p className="text-sm text-muted-foreground">
-                          {CATEGORIES.find((c) => c.id === transaction.category)?.name || "Unknown"} •{" "}
+                          {CATEGORIES.find((c) => c.id === transaction.category)?.name || "Outro"} •{" "}
                           {new Date(transaction.date).toLocaleDateString()}
                         </p>
                       </div>
@@ -107,7 +109,7 @@ export default function TransactionsPage() {
                       <p
                         className={`font-bold text-lg ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                       >
-                        {transaction.type === "income" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                        {transaction.type === "income" ? "+" : "-"} R$ {transaction.amount.toFixed(2)}
                       </p>
                       <Button variant="ghost" size="sm" onClick={() => deleteTransaction(transaction.id)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -123,5 +125,6 @@ export default function TransactionsPage() {
 
       <TransactionModal open={modalOpen} onOpenChange={setModalOpen} onSave={addTransaction} />
     </div>
+    </AuthGuard>
   )
 }

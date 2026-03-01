@@ -25,7 +25,7 @@ export function StatCard({ label, value, icon, trend, color = "blue" }: StatCard
           <p className="text-2xl font-bold mt-2">{value}</p>
           {trend !== undefined && (
             <p className={`text-xs mt-2 ${trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}% from last month
+              {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}% em relacao ao mes anterior
             </p>
           )}
         </div>

@@ -16,27 +16,8 @@ export interface Transaction {
   date: Date
 }
 
-export interface Budget {
-  id: string
-  category: string
-  limit: number
-  spent: number
-  month: string
-}
-
-export interface Goal {
-  id: string
-  name: string
-  targetAmount: number
-  currentAmount: number
-  deadline: Date
-  category: string
-}
-
 export interface FinancialData {
   transactions: Transaction[]
-  budgets: Budget[]
-  goals: Goal[]
   settings: {
     currency: string
     theme: "light" | "dark"

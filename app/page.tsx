@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useFinancial } from "@/hooks/useFinancial"
 import { Navigation } from "@/components/navigation"
+import { AuthGuard } from "@/components/auth-guard"
 import { StatCard } from "@/components/stat-card"
 import { TransactionModal } from "@/components/transaction-modal"
 import { Button } from "@/components/ui/button"
@@ -20,7 +21,7 @@ export default function Dashboard() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin text-4xl mb-4">💫</div>
-            <p className="text-muted-foreground">Loading your financial data...</p>
+            <p className="text-muted-foreground">Carregando seus dados financeiros...</p>
           </div>
         </div>
       </div>
@@ -45,58 +46,59 @@ export default function Dashboard() {
 
   const monthlyData = [
     { month: "Jan", income: 4800, expenses: 2400 },
-    { month: "Feb", income: 5200, expenses: 2800 },
+    { month: "Fev", income: 5200, expenses: 2800 },
     { month: "Mar", income: 4900, expenses: 2900 },
-    { month: "Apr", income: 5000, expenses: stats.expenses },
-    { month: "May", income: 5100, expenses: 2600 },
+    { month: "Abr", income: 5000, expenses: stats.expenses },
+    { month: "Mai", income: 5100, expenses: 2600 },
   ]
 
   return (
+    <AuthGuard>
     <div className="flex h-screen bg-background">
       <Navigation />
       <main className="flex-1 overflow-auto">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
-              <p className="text-muted-foreground mt-1">Welcome back, here's your financial overview</p>
+              <h2 className="text-3xl font-bold text-foreground">Painel</h2>
+              <p className="text-muted-foreground mt-1">Bem-vindo de volta, aqui esta seu resumo financeiro</p>
             </div>
             <Button onClick={() => setModalOpen(true)} className="gap-2">
               <Plus className="w-4 h-4" />
-              Add Transaction
+              Nova Transacao
             </Button>
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <StatCard
-              label="Monthly Income"
-              value={`$${stats.income.toFixed(2)}`}
+              label="Receita Mensal"
+              value={`R$ ${stats.income.toFixed(2)}`}
               icon={<TrendingUp />}
               color="green"
               trend={8}
             />
             <StatCard
-              label="Monthly Expenses"
-              value={`$${stats.expenses.toFixed(2)}`}
+              label="Despesas Mensais"
+              value={`R$ ${stats.expenses.toFixed(2)}`}
               icon={<TrendingDown />}
               color="red"
               trend={-5}
             />
             <StatCard
-              label="Savings This Month"
-              value={`$${savings.toFixed(2)}`}
+              label="Economia do Mes"
+              value={`R$ ${savings.toFixed(2)}`}
               icon={<Wallet />}
               color="blue"
               trend={15}
             />
-            <StatCard label="Total Savings" value={`$${(savings * 12).toFixed(2)}`} color="purple" />
+            <StatCard label="Economia Total" value={`R$ ${(savings * 12).toFixed(2)}`} color="purple" />
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Income vs Expenses</h3>
+              <h3 className="text-lg font-semibold mb-4">Receitas vs Despesas</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -110,7 +112,7 @@ export default function Dashboard() {
             </Card>
 
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Expenses by Category</h3>
+              <h3 className="text-lg font-semibold mb-4">Despesas por Categoria</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -134,7 +136,7 @@ export default function Dashboard() {
 
           {/* Recent Transactions */}
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
+            <h3 className="text-lg font-semibold mb-4">Transacoes Recentes</h3>
             <div className="space-y-3">
               {data?.transactions.slice(0, 5).map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -148,7 +150,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <p className={`font-semibold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                    {transaction.type === "income" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                    {transaction.type === "income" ? "+" : "-"} R$ {transaction.amount.toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -159,6 +161,7 @@ export default function Dashboard() {
 
       <TransactionModal open={modalOpen} onOpenChange={setModalOpen} onSave={addTransaction} />
     </div>
+    </AuthGuard>
   )
 }
 

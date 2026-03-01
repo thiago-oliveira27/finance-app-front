@@ -1,5 +1,19 @@
-[00:00:30.544] Server  LOG      ✓ Ready in 14.8s
-[00:00:33.575] Server  LOG      ○ Compiling / ...
-[00:00:43.629] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:28.035] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[00:01:28.035] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:00:15.324] Server  LOG      ✓ Ready in 9.7s
+[00:00:32.738] Server  LOG      ○ Compiling / ...
+[00:00:40.851] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:30.386] Server  LOG     [v0] Proxying login to: "http://localhost:8080/api/auth/login"
+[00:02:30.390] Server  LOG     [v0] Body: "{\"email\":\"thiago@gmail\",\"senha\":\"thiago\"}"
+[00:02:31.812] Server  LOG     [v0] Backend response status: 400
+[00:02:31.813] Server  LOG     [v0] Backend response body: "{\"status\":400,\"erro\":\"Email ou senha inválidos\",\"timestamp\":\"2026-02-28T23:06:46.677565\"}"
+[00:02:37.568] Server  LOG     [v0] Proxying login to: "http://localhost:8080/api/auth/login"
+[00:02:37.569] Server  LOG     [v0] Body: "{\"email\":\"thiago@gmail\",\"senha\":\"123456\"}"
+[00:02:38.083] Server  LOG     [v0] Backend response status: 400
+[00:02:38.084] Server  LOG     [v0] Backend response body: "{\"status\":400,\"erro\":\"Email ou senha inválidos\",\"timestamp\":\"2026-02-28T23:06:53.0125869\"}"
+[00:02:40.598] Server  LOG     [v0] Proxying login to: "http://localhost:8080/api/auth/login"
+[00:02:40.598] Server  LOG     [v0] Body: "{\"email\":\"thiago@gmail\",\"senha\":\"thiago27\"}"
+[00:02:41.114] Server  LOG     [v0] Backend response status: 400
+[00:02:41.115] Server  LOG     [v0] Backend response body: "{\"status\":400,\"erro\":\"Email ou senha inválidos\",\"timestamp\":\"2026-02-28T23:06:56.0473318\"}"
+[00:03:20.342] Server  LOG     [v0] Proxying login to: "http://localhost:8080/api/auth/login"
+[00:03:20.343] Server  LOG     [v0] Body: "{\"email\":\"thiago@gmail\",\"senha\":\"thiago\"}"
+[00:03:24.462] Server  LOG     [v0] Backend response status: 200
+[00:03:24.463] Server  LOG     [v0] Backend response body: "{\"token\":\"eyJhbGciOiJIUzI1NiJ9.eyJub21lIjoiVGhpYWdvIE9saXZlaXJhIiwidXNlcklkIjoxLCJzdWIiOiIxIiwiaWF0IjoxNzcyMzMwODU1LCJleHAiOjE3NzI0MTcyNTV9.d7kzzuO5GbqP0cR3OP-mjXFAJvDzUYyNj6jDOVW4-Zc\",\"userId\":1,\"nome\":\"Thiago Oliveira\",\"tipo\":\"Bearer\"}"

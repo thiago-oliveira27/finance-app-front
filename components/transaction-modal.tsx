@@ -46,7 +46,7 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>Nova Transacao</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex gap-2">
@@ -55,19 +55,19 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
               onClick={() => setType("income")}
               className="flex-1"
             >
-              Income
+              Receita
             </Button>
             <Button
               variant={type === "expense" ? "default" : "outline"}
               onClick={() => setType("expense")}
               className="flex-1"
             >
-              Expense
+              Despesa
             </Button>
           </div>
 
           <div>
-            <label className="text-sm font-medium">Amount</label>
+            <label className="text-sm font-medium">Valor</label>
             <Input
               type="number"
               placeholder="0.00"
@@ -78,10 +78,10 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
           </div>
 
           <div>
-            <label className="text-sm font-medium">Category</label>
+            <label className="text-sm font-medium">Categoria</label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
                 {filteredCategories.map((cat) => (
@@ -94,9 +94,9 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
           </div>
 
           <div>
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">Descricao</label>
             <Input
-              placeholder="What was this for?"
+              placeholder="Para que foi essa transacao?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="mt-1"
@@ -104,7 +104,7 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
           </div>
 
           <Button onClick={handleSave} className="w-full">
-            Save Transaction
+            Salvar Transacao
           </Button>
         </div>
       </DialogContent>

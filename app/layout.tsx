@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FinPlan - Financial Planner",
-  description: "Manage your finances with FinPlan",
+  title: "FinPlan - Planejador Financeiro",
+  description: "Gerencie suas financas com o FinPlan",
   generator: "v0.app",
 }
 
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body className={`font-sans antialiased`}>{children}</body>
     </html>
   )
