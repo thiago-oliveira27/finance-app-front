@@ -54,8 +54,8 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 async function POST(request) {
     try {
         const body = await request.json();
-        console.log("[v0] Proxying register to:", `${BACKEND_URL}/api/users/register`);
-        console.log("[v0] Body:", JSON.stringify(body));
+        console.log("Proxying register to:", `${BACKEND_URL}/api/users/register`);
+        console.log("Body:", JSON.stringify(body));
         const res = await fetch(`${BACKEND_URL}/api/users/register`, {
             method: "POST",
             headers: {
@@ -64,8 +64,8 @@ async function POST(request) {
             body: JSON.stringify(body)
         });
         const text = await res.text();
-        console.log("[v0] Backend response status:", res.status);
-        console.log("[v0] Backend response body:", text);
+        console.log("Backend response status:", res.status);
+        console.log("Backend response body:", text);
         return new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"](text, {
             status: res.status,
             headers: {
@@ -73,7 +73,7 @@ async function POST(request) {
             }
         });
     } catch (error) {
-        console.error("[v0] Proxy register error:", error);
+        console.error("Proxy register error:", error);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             message: "Nao foi possivel conectar ao backend. Verifique se ele esta rodando em " + BACKEND_URL
         }, {

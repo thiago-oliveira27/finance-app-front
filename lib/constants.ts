@@ -8,4 +8,3 @@ export const CATEGORIES = [
   { id: "7", name: "Freelance", icon: "💻", color: "#2D6A4F" },
 ]
 
-export const CURRENCIES = ["BRL", "USD", "EUR", "GBP"]

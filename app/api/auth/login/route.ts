@@ -1,32 +1,35 @@
 import { NextRequest, NextResponse } from "next/server"
 
+// Puxa a URL do seu Spring Boot das variáveis de ambiente
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    console.log("[v0] Proxying login to:", `${BACKEND_URL}/api/auth/login`)
-    console.log("[v0] Body:", JSON.stringify(body))
+    const credentials = await request.json()
 
-    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+    // Requisição direta para o serviço de autenticação do Java
+    const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(credentials),
     })
 
-    const text = await res.text()
-    console.log("[v0] Backend response status:", res.status)
-    console.log("[v0] Backend response body:", text)
+    const data = await response.text()
+    const contentType = response.headers.get("Content-Type") || "application/json"
 
-    return new NextResponse(text, {
-      status: res.status,
-      headers: { "Content-Type": res.headers.get("Content-Type") || "application/json" },
+    // Retorna a resposta do backend mantendo o status original (200, 401, etc)
+    return new NextResponse(data, {
+      status: response.status,
+      headers: { "Content-Type": contentType },
     })
+
   } catch (error) {
-    console.error("[v0] Proxy login error:", error)
+    // Log interno simplificado (não aparece para o usuário final)
+    console.error("Auth Proxy Error:", error)
+
     return NextResponse.json(
-      { message: "Nao foi possivel conectar ao backend. Verifique se ele esta rodando em " + BACKEND_URL },
-      { status: 502 }
+      { message: "Serviço de autenticação indisponível no momento." },
+      { status: 503 }
     )
   }
 }

@@ -136,7 +136,8 @@ function useFinancial() {
         transactions: [],
         settings: {
             currency: "BRL",
-            theme: "light"
+            theme: "light",
+            hideValues: false // Novo campo para o Switch de privacidade
         }
     });
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
@@ -166,7 +167,7 @@ function useFinancial() {
                                 type: t.tipo === "R" ? "income" : "expense",
                                 amount: Number(t.valor) || 0,
                                 description: t.descricao || "",
-                                category: t.idCategoria ? t.idCategoria.toString() : "1",
+                                category: t.idCategoria ? t.idCategoria.toString() : "",
                                 date: rawDate ? new Date(rawDate.split('T')[0] + "T12:00:00") : new Date()
                             };
                         }
@@ -196,9 +197,7 @@ function useFinancial() {
                 valor: transaction.amount,
                 descricao: transaction.description,
                 dataTransacao: new Date(transaction.date).toISOString().split('T')[0],
-                // ANTES: idCategoria: 1 (Fixo)
-                // AGORA: Envia a categoria que você selecionou no Modal
-                idCategoria: Number(transaction.category) || 1
+                idCategoria: Number(transaction.category)
             };
             const response = await fetch("/api/transaction", {
                 method: "POST",
@@ -283,7 +282,7 @@ function useFinancial() {
         getMonthlyStats
     };
 }
-_s(useFinancial, "Y9J19eJr7SXyhUeV//dCdbuQ7Ls=");
+_s(useFinancial, "oGwO3eyjUANFj6vF/8c8jO8QfAA=");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
@@ -293,7 +292,9 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 __turbopack_context__.s([
     "cn",
-    ()=>cn
+    ()=>cn,
+    "formatCurrency",
+    ()=>formatCurrency
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$clsx$2f$dist$2f$clsx$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/clsx/dist/clsx.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$tailwind$2d$merge$2f$dist$2f$bundle$2d$mjs$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/tailwind-merge/dist/bundle-mjs.mjs [app-client] (ecmascript)");
@@ -301,6 +302,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$tailwind$2d$
 ;
 function cn(...inputs) {
     return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$tailwind$2d$merge$2f$dist$2f$bundle$2d$mjs$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["twMerge"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$clsx$2f$dist$2f$clsx$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clsx"])(inputs));
+}
+function formatCurrency(value, currency = "BRL") {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: currency
+    }).format(value);
 }
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
@@ -784,6 +791,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/ResponsiveContainer.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$download$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Download$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/download.js [app-client] (ecmascript) <export default as Download>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$auth$2d$guard$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/auth-guard.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)"); // Adicionado para controle de estado e performance
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
@@ -794,41 +802,63 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+;
 function ReportsPage() {
     _s();
-    const { data } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$useFinancial$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useFinancial"])();
-    const monthlyData = [
-        {
-            month: "Jan",
-            income: 4800,
-            expenses: 2400,
-            savings: 2400
-        },
-        {
-            month: "Fev",
-            income: 5200,
-            expenses: 2800,
-            savings: 2400
-        },
-        {
-            month: "Mar",
-            income: 4900,
-            expenses: 2900,
-            savings: 2000
-        },
-        {
-            month: "Abr",
-            income: 5000,
-            expenses: 2600,
-            savings: 2400
-        },
-        {
-            month: "Mai",
-            income: 5100,
-            expenses: 2200,
-            savings: 2900
+    const { data, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$useFinancial$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useFinancial"])();
+    const [mounted, setMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    // Garante que o gráfico só renderize no cliente para evitar erros de hidratação
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "ReportsPage.useEffect": ()=>{
+            setMounted(true);
         }
-    ];
+    }["ReportsPage.useEffect"], []);
+    // Processa as transações reais para gerar os dados mensais
+    const monthlyData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
+        "ReportsPage.useMemo[monthlyData]": ()=>{
+            if (!data?.transactions || data.transactions.length === 0) return [];
+            const monthsMap = {};
+            // Nomes dos meses para exibição
+            const monthNames = [
+                "Jan",
+                "Fev",
+                "Mar",
+                "Abr",
+                "Mai",
+                "Jun",
+                "Jul",
+                "Ago",
+                "Set",
+                "Out",
+                "Nov",
+                "Dez"
+            ];
+            data.transactions.forEach({
+                "ReportsPage.useMemo[monthlyData]": (t)=>{
+                    const date = new Date(t.date);
+                    const monthLabel = monthNames[date.getMonth()];
+                    if (!monthsMap[monthLabel]) {
+                        monthsMap[monthLabel] = {
+                            month: monthLabel,
+                            income: 0,
+                            expenses: 0,
+                            savings: 0
+                        };
+                    }
+                    if (t.type === "income") {
+                        monthsMap[monthLabel].income += Number(t.amount);
+                    } else {
+                        monthsMap[monthLabel].expenses += Number(t.amount);
+                    }
+                    monthsMap[monthLabel].savings = monthsMap[monthLabel].income - monthsMap[monthLabel].expenses;
+                }
+            }["ReportsPage.useMemo[monthlyData]"]);
+            // Retorna os dados ordenados cronologicamente (ajustar lógica de ordenação se necessário)
+            return Object.values(monthsMap).reverse();
+        }
+    }["ReportsPage.useMemo[monthlyData]"], [
+        data?.transactions
+    ]);
     const handleExportCSV = ()=>{
         const headers = [
             "Data",
@@ -859,14 +889,30 @@ function ReportsPage() {
         a.download = "transacoes.csv";
         a.click();
     };
+    if (loading) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "flex h-screen items-center justify-center bg-background",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                children: "Carregando relatórios reais..."
+            }, void 0, false, {
+                fileName: "[project]/app/reports/page.tsx",
+                lineNumber: 74,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "[project]/app/reports/page.tsx",
+            lineNumber: 73,
+            columnNumber: 7
+        }, this);
+    }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$auth$2d$guard$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AuthGuard"], {
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "flex h-screen bg-background",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$navigation$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Navigation"], {}, void 0, false, {
                     fileName: "[project]/app/reports/page.tsx",
-                    lineNumber: 45,
-                    columnNumber: 7
+                    lineNumber: 82,
+                    columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
                     className: "flex-1 overflow-auto",
@@ -880,25 +926,25 @@ function ReportsPage() {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                                                 className: "text-3xl font-bold",
-                                                children: "Relatorios"
+                                                children: "Relatórios"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 50,
-                                                columnNumber: 15
+                                                lineNumber: 87,
+                                                columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-muted-foreground mt-1",
-                                                children: "Analise seus dados financeiros"
+                                                children: "Analise seus dados reais sincronizados"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 51,
-                                                columnNumber: 15
+                                                lineNumber: 88,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/reports/page.tsx",
-                                        lineNumber: 49,
-                                        columnNumber: 13
+                                        lineNumber: 86,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                         onClick: handleExportCSV,
@@ -908,21 +954,21 @@ function ReportsPage() {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 54,
-                                                columnNumber: 15
+                                                lineNumber: 91,
+                                                columnNumber: 17
                                             }, this),
                                             "Exportar CSV"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/reports/page.tsx",
-                                        lineNumber: 53,
-                                        columnNumber: 13
+                                        lineNumber: 90,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/reports/page.tsx",
-                                lineNumber: 48,
-                                columnNumber: 11
+                                lineNumber: 85,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-1 gap-6",
@@ -932,243 +978,280 @@ function ReportsPage() {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                                 className: "text-lg font-semibold mb-4",
-                                                children: "Tendencias Mensais"
+                                                children: "Tendências Mensais"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 61,
-                                                columnNumber: 15
+                                                lineNumber: 99,
+                                                columnNumber: 17
                                             }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
-                                                width: "100%",
-                                                height: 400,
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["LineChart"], {
-                                                    data: monthlyData,
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CartesianGrid"], {
-                                                            strokeDasharray: "3 3",
-                                                            stroke: "var(--border)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 64,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
-                                                            dataKey: "month",
-                                                            stroke: "var(--muted-foreground)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 65,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
-                                                            stroke: "var(--muted-foreground)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 66,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
-                                                            contentStyle: {
-                                                                backgroundColor: "var(--card)",
-                                                                border: "1px solid var(--border)"
-                                                            }
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 67,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
-                                                            type: "monotone",
-                                                            dataKey: "income",
-                                                            stroke: "#52B788",
-                                                            dot: {
-                                                                r: 5
-                                                            }
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 68,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
-                                                            type: "monotone",
-                                                            dataKey: "expenses",
-                                                            stroke: "#FF6B6B",
-                                                            dot: {
-                                                                r: 5
-                                                            }
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 69,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
-                                                            type: "monotone",
-                                                            dataKey: "savings",
-                                                            stroke: "#4ECDC4",
-                                                            dot: {
-                                                                r: 5
-                                                            }
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 70,
-                                                            columnNumber: 19
-                                                        }, this)
-                                                    ]
-                                                }, void 0, true, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "h-[400px] w-full",
+                                                children: mounted && (monthlyData.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["LineChart"], {
+                                                        data: monthlyData,
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                                                strokeDasharray: "3 3",
+                                                                stroke: "var(--border)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 104,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
+                                                                dataKey: "month",
+                                                                stroke: "var(--muted-foreground)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 105,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
+                                                                stroke: "var(--muted-foreground)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 106,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                                                contentStyle: {
+                                                                    backgroundColor: "var(--card)",
+                                                                    border: "1px solid var(--border)"
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 107,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
+                                                                type: "monotone",
+                                                                dataKey: "income",
+                                                                name: "Receita",
+                                                                stroke: "#10b981",
+                                                                strokeWidth: 2,
+                                                                dot: {
+                                                                    r: 5
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 108,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
+                                                                type: "monotone",
+                                                                dataKey: "expenses",
+                                                                name: "Despesa",
+                                                                stroke: "#ef4444",
+                                                                strokeWidth: 2,
+                                                                dot: {
+                                                                    r: 5
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 109,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
+                                                                type: "monotone",
+                                                                dataKey: "savings",
+                                                                name: "Economia",
+                                                                stroke: "#3b82f6",
+                                                                strokeWidth: 2,
+                                                                dot: {
+                                                                    r: 5
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 110,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/app/reports/page.tsx",
+                                                        lineNumber: 103,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                }, void 0, false, {
                                                     fileName: "[project]/app/reports/page.tsx",
-                                                    lineNumber: 63,
-                                                    columnNumber: 17
-                                                }, this)
+                                                    lineNumber: 102,
+                                                    columnNumber: 21
+                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex h-full items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg",
+                                                    children: "Dados insuficientes para gerar tendências."
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/reports/page.tsx",
+                                                    lineNumber: 114,
+                                                    columnNumber: 21
+                                                }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 62,
-                                                columnNumber: 15
+                                                lineNumber: 100,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/reports/page.tsx",
-                                        lineNumber: 60,
-                                        columnNumber: 13
+                                        lineNumber: 98,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
                                         className: "p-6",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                                 className: "text-lg font-semibold mb-4",
-                                                children: "Comparacao Mensal"
+                                                children: "Comparação Mensal"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 76,
-                                                columnNumber: 15
+                                                lineNumber: 123,
+                                                columnNumber: 17
                                             }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
-                                                width: "100%",
-                                                height: 300,
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BarChart"], {
-                                                    data: monthlyData,
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CartesianGrid"], {
-                                                            strokeDasharray: "3 3",
-                                                            stroke: "var(--border)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 79,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
-                                                            dataKey: "month",
-                                                            stroke: "var(--muted-foreground)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 80,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
-                                                            stroke: "var(--muted-foreground)"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 81,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
-                                                            contentStyle: {
-                                                                backgroundColor: "var(--card)",
-                                                                border: "1px solid var(--border)"
-                                                            }
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 82,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
-                                                            dataKey: "income",
-                                                            fill: "#52B788",
-                                                            radius: [
-                                                                8,
-                                                                8,
-                                                                0,
-                                                                0
-                                                            ]
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 83,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
-                                                            dataKey: "expenses",
-                                                            fill: "#FF6B6B",
-                                                            radius: [
-                                                                8,
-                                                                8,
-                                                                0,
-                                                                0
-                                                            ]
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 84,
-                                                            columnNumber: 19
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
-                                                            dataKey: "savings",
-                                                            fill: "#4ECDC4",
-                                                            radius: [
-                                                                8,
-                                                                8,
-                                                                0,
-                                                                0
-                                                            ]
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/reports/page.tsx",
-                                                            lineNumber: 85,
-                                                            columnNumber: 19
-                                                        }, this)
-                                                    ]
-                                                }, void 0, true, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "h-[300px] w-full",
+                                                children: mounted && (monthlyData.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BarChart"], {
+                                                        data: monthlyData,
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                                                strokeDasharray: "3 3",
+                                                                stroke: "var(--border)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 128,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
+                                                                dataKey: "month",
+                                                                stroke: "var(--muted-foreground)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 129,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
+                                                                stroke: "var(--muted-foreground)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 130,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                                                contentStyle: {
+                                                                    backgroundColor: "var(--card)",
+                                                                    border: "1px solid var(--border)"
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 131,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
+                                                                dataKey: "income",
+                                                                name: "Receita",
+                                                                fill: "#10b981",
+                                                                radius: [
+                                                                    4,
+                                                                    4,
+                                                                    0,
+                                                                    0
+                                                                ]
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 132,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
+                                                                dataKey: "expenses",
+                                                                name: "Despesa",
+                                                                fill: "#ef4444",
+                                                                radius: [
+                                                                    4,
+                                                                    4,
+                                                                    0,
+                                                                    0
+                                                                ]
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 133,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Bar"], {
+                                                                dataKey: "savings",
+                                                                name: "Economia",
+                                                                fill: "#3b82f6",
+                                                                radius: [
+                                                                    4,
+                                                                    4,
+                                                                    0,
+                                                                    0
+                                                                ]
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/reports/page.tsx",
+                                                                lineNumber: 134,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/app/reports/page.tsx",
+                                                        lineNumber: 127,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                }, void 0, false, {
                                                     fileName: "[project]/app/reports/page.tsx",
-                                                    lineNumber: 78,
-                                                    columnNumber: 17
-                                                }, this)
+                                                    lineNumber: 126,
+                                                    columnNumber: 21
+                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex h-full items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg",
+                                                    children: "Nenhuma transação registrada para comparação."
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/reports/page.tsx",
+                                                    lineNumber: 138,
+                                                    columnNumber: 21
+                                                }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/reports/page.tsx",
-                                                lineNumber: 77,
-                                                columnNumber: 15
+                                                lineNumber: 124,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/reports/page.tsx",
-                                        lineNumber: 75,
-                                        columnNumber: 13
+                                        lineNumber: 122,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/reports/page.tsx",
-                                lineNumber: 59,
-                                columnNumber: 11
+                                lineNumber: 96,
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/reports/page.tsx",
-                        lineNumber: 47,
-                        columnNumber: 9
+                        lineNumber: 84,
+                        columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/reports/page.tsx",
-                    lineNumber: 46,
-                    columnNumber: 7
+                    lineNumber: 83,
+                    columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/reports/page.tsx",
-            lineNumber: 44,
-            columnNumber: 5
+            lineNumber: 81,
+            columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/reports/page.tsx",
-        lineNumber: 43,
+        lineNumber: 80,
         columnNumber: 5
     }, this);
 }
-_s(ReportsPage, "bbnGmoW7VSnNVL8ACXJXcYsuSlg=", false, function() {
+_s(ReportsPage, "og+tSYsFz5Dv1hifXUpLS8DxRx0=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$useFinancial$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useFinancial"]
     ];

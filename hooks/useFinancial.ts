@@ -4,17 +4,36 @@ import { useState, useEffect } from "react"
 import type { FinancialData, Transaction } from "@/types"
 import { getToken } from "@/lib/auth"
 
+/**
+ * Hook customizado para orquestração do estado financeiro e sincronização com serviços externos.
+ * Gerencia o ciclo de vida dos dados transacionais, metas e preferências de interface.
+ */
 export function useFinancial() {
   const [data, setData] = useState<FinancialData>({
     transactions: [],
-    settings: { currency: "BRL", theme: "light" }
+    goals: [],    
+    budgets: [],  
+    settings: { 
+      currency: "BRL", 
+      theme: "light",
+      hideValues: false 
+    }
   })
   const [loading, setLoading] = useState(true)
 
-  // 1. BUSCAR DADOS
+  /**
+   * Efeito de inicialização: Recupera transações do backend e sincroniza metas persistidas localmente.
+   */
   useEffect(() => {
     async function fetchFinancialData() {
       const token = getToken()
+      
+      // Recuperação de metas do armazenamento local (LocalStorage)
+      const savedGoals = localStorage.getItem("finplan_goals")
+      if (savedGoals) {
+        setData(prev => ({ ...prev, goals: JSON.parse(savedGoals) }))
+      }
+
       if (!token) {
         setLoading(false)
         return
@@ -26,7 +45,7 @@ export function useFinancial() {
           headers: { "Authorization": `Bearer ${token}` }
         })
 
-        if (!response.ok) throw new Error("Erro na rede")
+        if (!response.ok) throw new Error("Falha na comunicação com a API de transações")
 
         const res = await response.json()
         
@@ -49,7 +68,7 @@ export function useFinancial() {
           transactions: mappedTransactions
         }))
       } catch (error) {
-        console.error("Erro na integração:", error)
+        console.error("Erro ao processar integração de dados transacionais:", error)
       } finally {
         setLoading(false)
       }
@@ -57,8 +76,9 @@ export function useFinancial() {
     fetchFinancialData()
   }, [])
 
-  // 2. SALVAR TRANSAÇÃO
-  // 2. SALVAR TRANSAÇÃO (Atualizado para aceitar a categoria escolhida)
+  /**
+   * Registra uma nova movimentação financeira no serviço de persistência.
+   */
   const addTransaction = async (transaction: Omit<Transaction, "id">) => {
     try {
       const token = getToken()
@@ -79,7 +99,7 @@ export function useFinancial() {
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) throw new Error("Erro ao salvar")
+      if (!response.ok) throw new Error("Erro ao persistir transação")
       const newT = await response.json()
 
       const rawDate = newT.dataHoraTransacao || newT.dataTransacao;
@@ -89,7 +109,6 @@ export function useFinancial() {
         type: newT.tipo === "R" ? "income" : "expense",
         amount: Number(newT.valor) || 0,
         description: newT.descricao || "",
-        // Mapeia o ID que voltou do Java para o Front-end reconhecer o ícone
         category: newT.idCategoria ? newT.idCategoria.toString() : transaction.category,
         date: rawDate ? new Date(rawDate.split('T')[0] + "T12:00:00") : new Date()
       }
@@ -99,11 +118,13 @@ export function useFinancial() {
         transactions: [mappedNew, ...prev.transactions]
       }))
     } catch (error) {
-      alert("Erro ao salvar.");
+      console.error("Falha no fluxo de inserção de dados:", error);
     }
   }
 
-  // 3. DELETAR TRANSAÇÃO (CORRIGIDO)
+  /**
+   * Solicita a exclusão de um registro transacional específico via identificador único.
+   */
   const deleteTransaction = async (id: string) => {
     try {
       const token = getToken()
@@ -119,23 +140,49 @@ export function useFinancial() {
         }))
       }
     } catch (error) {
-      console.error("Erro ao deletar:", error)
+      console.error("Erro ao remover registro do banco de dados:", error)
     }
   }
 
-  // 4. ATUALIZAR CONFIGURAÇÕES (RESOLVE O ERRO DO TEMA)
+  /**
+   * Atualiza as configurações globais de visualização e persiste o estado do tema.
+   */
   const updateSettings = (newSettings: Partial<FinancialData["settings"]>) => {
     setData((prev) => ({
       ...prev,
       settings: { ...prev.settings, ...newSettings }
     }))
     
-    // Opcional: Aplicar classe dark ao HTML para o CSS mudar de cor
     if (newSettings.theme) {
       document.documentElement.classList.toggle("dark", newSettings.theme === "dark")
     }
   }
 
+  /**
+   * Gestão de Metas Financeiras (Persistência em armazenamento local do cliente).
+   */
+  const addGoal = (goal: any) => {
+    setData(prev => {
+      const updatedGoals = [...prev.goals, { ...goal, id: Date.now().toString() }];
+      localStorage.setItem("finplan_goals", JSON.stringify(updatedGoals));
+      return { ...prev, goals: updatedGoals };
+    })
+  }
+
+  /**
+   * Atualiza o estado de progresso de um objetivo específico e sincroniza localmente.
+   */
+  const updateGoal = (id: string, updates: any) => {
+    setData(prev => {
+      const updatedGoals = prev.goals.map((g: { id: string }) => g.id === id ? { ...g, ...updates } : g);
+      localStorage.setItem("finplan_goals", JSON.stringify(updatedGoals));
+      return { ...prev, goals: updatedGoals };
+    })
+  }
+
+  /**
+   * Consolida métricas de fluxo de caixa para consumo do Dashboard.
+   */
   const getMonthlyStats = () => {
     const validTransactions = data.transactions.filter(t => !isNaN(t.date.getTime()));
     const income = validTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
@@ -148,7 +195,9 @@ export function useFinancial() {
     loading, 
     addTransaction, 
     deleteTransaction, 
-    updateSettings, // Adicionado aqui para a página de configurações encontrar
+    updateSettings,
+    addGoal,    
+    updateGoal, 
     getMonthlyStats 
   }
 }

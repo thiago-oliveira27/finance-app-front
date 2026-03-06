@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useFinancial } from "@/hooks/useFinancial"
 import { Navigation } from "@/components/navigation"
 import { TransactionModal } from "@/components/transaction-modal"
@@ -11,7 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, Search } from "lucide-react"
 import { CATEGORIES } from "@/lib/constants"
 import { AuthGuard } from "@/components/auth-guard"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
+/**
+ * Gerenciamento centralizado de movimentações financeiras.
+ * Interface para visualização, filtragem e exclusão de registros transacionais.
+ */
 export default function TransactionsPage() {
   const { data, deleteTransaction, addTransaction } = useFinancial()
   const [modalOpen, setModalOpen] = useState(false)
@@ -19,14 +34,19 @@ export default function TransactionsPage() {
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all")
   const [filterCategory, setFilterCategory] = useState("all")
 
-  const filtered =
-    data?.transactions.filter((t) => {
+  /**
+   * Pipeline de filtragem de dados.
+   * Aplica critérios de busca textual, tipificação e categorização de forma reativa.
+   */
+  const filtered = useMemo(() => {
+    return data?.transactions.filter((t) => {
       const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = filterType === "all" || t.type === filterType
       const matchesCategory = filterCategory === "all" || String(t.category) === String(filterCategory)
       
       return matchesSearch && matchesType && matchesCategory
     }) || []
+  }, [data?.transactions, searchQuery, filterType, filterCategory])
 
   return (
     <AuthGuard>
@@ -39,13 +59,16 @@ export default function TransactionsPage() {
                 <h2 className="text-3xl font-bold">Transações</h2>
                 <p className="text-muted-foreground mt-1">Gerencie e acompanhe todas as suas movimentações</p>
               </div>
-              <Button onClick={() => setModalOpen(true)} className="gap-2">
+              <button 
+                onClick={() => setModalOpen(true)} 
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 Nova Transação
-              </Button>
+              </button>
             </div>
 
-            {/* Filtros */}
+            {/* Seção de filtros e busca customizada */}
             <Card className="p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
@@ -85,7 +108,7 @@ export default function TransactionsPage() {
               </div>
             </Card>
 
-            {/* Lista de Transações */}
+            {/* Listagem de registros sincronizados com o backend */}
             <Card className="overflow-hidden">
               <div className="divide-y divide-border">
                 {filtered.length === 0 ? (
@@ -113,21 +136,40 @@ export default function TransactionsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-6">
+                          {/* Exibição de valores monetários com sinalização de fluxo */}
                           <p className={`font-bold text-lg ${transaction.type === "income" ? "text-emerald-500" : "text-red-500"}`}>
                             {transaction.type === "income" ? "+" : "-"} R$ {transaction.amount.toFixed(2)}
                           </p>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => {
-                              if(window.confirm("Deseja realmente excluir esta transação?")) {
-                                deleteTransaction(transaction.id)
-                              }
-                            }}
-                            className="hover:bg-destructive/10 hover:text-destructive"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </Button>
+                          
+                          {/* Fluxo de confirmação para destruição de registro */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir esta transação? Esta operação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => deleteTransaction(transaction.id)}
+                                  className="bg-destructive text-white hover:bg-destructive/90 px-6 py-2.5 font-bold"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     );
