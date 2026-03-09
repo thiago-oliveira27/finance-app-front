@@ -1,10 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
+  // Mantendo seus rewrites para o Java
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:8080/api/:path*',
+      },
+    ]
   },
-  images: {
-    unoptimized: true,
+
+  // CONFIGURAÇÃO PARA REMOVER O ÍCONE "N"
+  devIndicators: {
+    appIsrStatus: false, // Remove o ícone de status de renderização
+    buildActivity: false, // Remove o indicador de compilação
   },
 }
 

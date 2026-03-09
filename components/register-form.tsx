@@ -10,44 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, CheckCircle2, Loader2, Wallet } from "lucide-react"
 
-function formatCpf(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 11)
-  if (digits.length <= 3) return digits
-  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
-  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
-}
-
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 11)
-  if (digits.length <= 2) return digits
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
-}
-
-function isValidCpf(cpf: string): boolean {
-  const digits = cpf.replace(/\D/g, "")
-  if (digits.length !== 11) return false
-  if (/^(\d)\1{10}$/.test(digits)) return false
-
-  let sum = 0
-  for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i)
-  let remainder = (sum * 10) % 11
-  if (remainder === 10) remainder = 0
-  if (remainder !== parseInt(digits[9])) return false
-
-  sum = 0
-  for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i)
-  remainder = (sum * 10) % 11
-  if (remainder === 10) remainder = 0
-  return remainder === parseInt(digits[10])
-}
-
 interface FieldErrors {
   nome?: string
   email?: string
-  cpf?: string
-  telefone?: string
   senha?: string
   confirmarSenha?: string
 }
@@ -56,8 +21,6 @@ export function RegisterForm() {
   const router = useRouter()
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
-  const [cpf, setCpf] = useState("")
-  const [telefone, setTelefone] = useState("")
   const [senha, setSenha] = useState("")
   const [confirmarSenha, setConfirmarSenha] = useState("")
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -73,12 +36,6 @@ export function RegisterForm() {
     }
     if (!email.includes("@") || !email.includes(".")) {
       errs.email = "Digite um email valido"
-    }
-    if (cpf && !isValidCpf(cpf)) {
-      errs.cpf = "CPF invalido"
-    }
-    if (telefone && telefone.replace(/\D/g, "").length < 10) {
-      errs.telefone = "Telefone incompleto"
     }
     if (senha.length < 6) {
       errs.senha = "Senha deve ter pelo menos 6 caracteres"
@@ -171,33 +128,6 @@ export function RegisterForm() {
               autoComplete="email"
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                value={cpf}
-                onChange={(e) => setCpf(formatCpf(e.target.value))}
-                autoComplete="off"
-              />
-              {errors.cpf && <p className="text-xs text-destructive">{errors.cpf}</p>}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="telefone">Telefone</Label>
-              <Input
-                id="telefone"
-                type="text"
-                placeholder="(00) 00000-0000"
-                value={telefone}
-                onChange={(e) => setTelefone(formatPhone(e.target.value))}
-                autoComplete="tel"
-              />
-              {errors.telefone && <p className="text-xs text-destructive">{errors.telefone}</p>}
-            </div>
           </div>
 
           <div className="flex flex-col gap-2">

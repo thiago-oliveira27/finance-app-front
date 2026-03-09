@@ -50,34 +50,35 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 ;
+// Puxa a URL do seu Spring Boot das variáveis de ambiente
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 async function POST(request) {
     try {
-        const body = await request.json();
-        console.log("[v0] Proxying login to:", `${BACKEND_URL}/api/auth/login`);
-        console.log("[v0] Body:", JSON.stringify(body));
-        const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        const credentials = await request.json();
+        // Requisição direta para o serviço de autenticação do Java
+        const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(credentials)
         });
-        const text = await res.text();
-        console.log("[v0] Backend response status:", res.status);
-        console.log("[v0] Backend response body:", text);
-        return new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"](text, {
-            status: res.status,
+        const data = await response.text();
+        const contentType = response.headers.get("Content-Type") || "application/json";
+        // Retorna a resposta do backend mantendo o status original (200, 401, etc)
+        return new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"](data, {
+            status: response.status,
             headers: {
-                "Content-Type": res.headers.get("Content-Type") || "application/json"
+                "Content-Type": contentType
             }
         });
     } catch (error) {
-        console.error("[v0] Proxy login error:", error);
+        // Log interno simplificado (não aparece para o usuário final)
+        console.error("Auth Proxy Error:", error);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            message: "Nao foi possivel conectar ao backend. Verifique se ele esta rodando em " + BACKEND_URL
+            message: "Serviço de autenticação indisponível no momento."
         }, {
-            status: 502
+            status: 503
         });
     }
 }

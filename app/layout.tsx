@@ -9,7 +9,6 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "FinPlan - Planejador Financeiro",
   description: "Gerencie suas financas com o FinPlan",
-  generator: "v0.app",
 }
 
 export default function RootLayout({

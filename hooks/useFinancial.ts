@@ -2,125 +2,202 @@
 
 import { useState, useEffect } from "react"
 import type { FinancialData, Transaction } from "@/types"
+import { getToken } from "@/lib/auth"
 
-const STORAGE_KEY = "financial_planner_data"
-
-const generateMockData = (): FinancialData => {
-  const today = new Date()
-  return {
-    transactions: [
-      {
-        id: "1",
-        type: "income",
-        amount: 5000,
-        category: "salary",
-        description: "Monthly Salary",
-        date: new Date(today.getFullYear(), today.getMonth(), 1),
-      },
-      {
-        id: "2",
-        type: "expense",
-        amount: 45.5,
-        category: "food",
-        description: "Coffee & Lunch",
-        date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
-      },
-      {
-        id: "3",
-        type: "expense",
-        amount: 120,
-        category: "transport",
-        description: "Gas",
-        date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2),
-      },
-      {
-        id: "4",
-        type: "expense",
-        amount: 80,
-        category: "entertainment",
-        description: "Movie tickets",
-        date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3),
-      },
-      {
-        id: "5",
-        type: "expense",
-        amount: 150,
-        category: "utilities",
-        description: "Electricity bill",
-        date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5),
-      },
-    ],
-    settings: {
-      currency: "USD",
-      theme: "light",
-    },
-  }
-}
-
-const deserializeData = (data: any): FinancialData => {
-  return {
-    ...data,
-    transactions: data.transactions.map((t: any) => ({
-      ...t,
-      date: typeof t.date === "string" ? new Date(t.date) : t.date,
-    })),
-  }
-}
-
+/**
+ * Hook customizado para orquestração do estado financeiro e sincronização com serviços externos.
+ * Gerencia o ciclo de vida dos dados transacionais, metas e preferências de interface.
+ */
 export function useFinancial() {
-  const [data, setData] = useState<FinancialData | null>(null)
+  const [data, setData] = useState<FinancialData>({
+    transactions: [],
+    goals: [],    
+    budgets: [],  
+    settings: { 
+      currency: "BRL", 
+      theme: "light",
+      hideValues: false 
+    }
+  })
   const [loading, setLoading] = useState(true)
 
+  /**
+   * Efeito de inicialização: Recupera transações do backend e sincroniza metas persistidas localmente.
+   */
   useEffect(() => {
-    // Simulate async load
-    const timer = setTimeout(() => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      setData(stored ? deserializeData(JSON.parse(stored)) : generateMockData())
-      setLoading(false)
-    }, 300)
-    return () => clearTimeout(timer)
+    async function fetchFinancialData() {
+      const token = getToken()
+      
+      // Recuperação de metas do armazenamento local (LocalStorage)
+      const savedGoals = localStorage.getItem("finplan_goals")
+      if (savedGoals) {
+        setData(prev => ({ ...prev, goals: JSON.parse(savedGoals) }))
+      }
+
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      try {
+        const response = await fetch("/api/transaction", {
+          headers: { "Authorization": `Bearer ${token}` }
+        })
+
+        if (!response.ok) throw new Error("Falha na comunicação com a API de transações")
+
+        const res = await response.json()
+        
+        const mappedTransactions: Transaction[] = Array.isArray(res) 
+          ? res.map((t: any) => {
+              const rawDate = t.dataHoraTransacao || t.dataTransacao;
+              return {
+                id: (t.idTransacao || t.id || Math.random()).toString(),
+                type: t.tipo === "R" ? "income" : "expense",
+                amount: Number(t.valor) || 0,
+                description: t.descricao || "",
+                category: t.idCategoria ? t.idCategoria.toString() : "",
+                date: rawDate ? new Date(rawDate.split('T')[0] + "T12:00:00") : new Date()
+              }
+            })
+          : []
+
+        setData(prev => ({
+          ...prev,
+          transactions: mappedTransactions
+        }))
+      } catch (error) {
+        console.error("Erro ao processar integração de dados transacionais:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchFinancialData()
   }, [])
 
-  const saveData = (newData: FinancialData) => {
-    setData(newData)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData))
-  }
+  /**
+   * Registra uma nova movimentação financeira no serviço de persistência.
+   */
+  const addTransaction = async (transaction: Omit<Transaction, "id">) => {
+    try {
+      const token = getToken()
+      const payload = {
+        tipo: transaction.type === "income" ? "R" : "D",
+        valor: transaction.amount,
+        descricao: transaction.description,
+        dataTransacao: new Date(transaction.date).toISOString().split('T')[0],
+        idCategoria: Number(transaction.category) 
+      }
 
-  const addTransaction = (transaction: Omit<Transaction, "id">) => {
-    if (!data) return
-    const newTransaction = { ...transaction, id: Date.now().toString() }
-    saveData({ ...data, transactions: [newTransaction, ...data.transactions] })
-  }
+      const response = await fetch("/api/transaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
 
-  const deleteTransaction = (id: string) => {
-    if (!data) return
-    saveData({ ...data, transactions: data.transactions.filter((t) => t.id !== id) })
-  }
+      if (!response.ok) throw new Error("Erro ao persistir transação")
+      const newT = await response.json()
 
-  const updateSettings = (settings: Partial<typeof data.settings>) => {
-    if (!data) return
-    saveData({ ...data, settings: { ...data.settings, ...settings } })
-  }
+      const rawDate = newT.dataHoraTransacao || newT.dataTransacao;
 
-  const getMonthlyStats = () => {
-    if (!data) return { income: 0, expenses: 0 }
-    const currentMonth = new Date().toISOString().slice(0, 7)
-    const monthTransactions = data.transactions.filter((t) => {
-      const transactionDate = t.date instanceof Date ? t.date : new Date(t.date)
-      return transactionDate.toISOString().slice(0, 7) === currentMonth
-    })
-    return {
-      income: monthTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0),
-      expenses: monthTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0),
+      const mappedNew: Transaction = {
+        id: (newT.idTransacao || newT.id || Date.now()).toString(),
+        type: newT.tipo === "R" ? "income" : "expense",
+        amount: Number(newT.valor) || 0,
+        description: newT.descricao || "",
+        category: newT.idCategoria ? newT.idCategoria.toString() : transaction.category,
+        date: rawDate ? new Date(rawDate.split('T')[0] + "T12:00:00") : new Date()
+      }
+
+      setData((prev) => ({
+        ...prev,
+        transactions: [mappedNew, ...prev.transactions]
+      }))
+    } catch (error) {
+      console.error("Falha no fluxo de inserção de dados:", error);
     }
   }
 
-  return {
-    data,
-    loading,
-    addTransaction,
-    deleteTransaction,
+  /**
+   * Solicita a exclusão de um registro transacional específico via identificador único.
+   */
+  const deleteTransaction = async (id: string) => {
+    try {
+      const token = getToken()
+      const response = await fetch(`/api/transaction/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        setData((prev) => ({
+          ...prev,
+          transactions: prev.transactions.filter((t) => t.id !== id)
+        }))
+      }
+    } catch (error) {
+      console.error("Erro ao remover registro do banco de dados:", error)
+    }
+  }
+
+  /**
+   * Atualiza as configurações globais de visualização e persiste o estado do tema.
+   */
+  const updateSettings = (newSettings: Partial<FinancialData["settings"]>) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, ...newSettings }
+    }))
+    
+    if (newSettings.theme) {
+      document.documentElement.classList.toggle("dark", newSettings.theme === "dark")
+    }
+  }
+
+  /**
+   * Gestão de Metas Financeiras (Persistência em armazenamento local do cliente).
+   */
+  const addGoal = (goal: any) => {
+    setData(prev => {
+      const updatedGoals = [...prev.goals, { ...goal, id: Date.now().toString() }];
+      localStorage.setItem("finplan_goals", JSON.stringify(updatedGoals));
+      return { ...prev, goals: updatedGoals };
+    })
+  }
+
+  /**
+   * Atualiza o estado de progresso de um objetivo específico e sincroniza localmente.
+   */
+  const updateGoal = (id: string, updates: any) => {
+    setData(prev => {
+      const updatedGoals = prev.goals.map((g: { id: string }) => g.id === id ? { ...g, ...updates } : g);
+      localStorage.setItem("finplan_goals", JSON.stringify(updatedGoals));
+      return { ...prev, goals: updatedGoals };
+    })
+  }
+
+  /**
+   * Consolida métricas de fluxo de caixa para consumo do Dashboard.
+   */
+  const getMonthlyStats = () => {
+    const validTransactions = data.transactions.filter(t => !isNaN(t.date.getTime()));
+    const income = validTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
+    const expenses = validTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
+    return { income, expenses }
+  }
+
+  return { 
+    data, 
+    loading, 
+    addTransaction, 
+    deleteTransaction, 
     updateSettings,
-    getMonthlyStats,
+    addGoal,    
+    updateGoal, 
+    getMonthlyStats 
   }
 }

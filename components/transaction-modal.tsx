@@ -29,6 +29,7 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
         description,
         date: new Date(),
       })
+      // Limpa os campos após salvar
       setAmount("")
       setCategory("")
       setDescription("")
@@ -36,30 +37,39 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
     }
   }
 
-  const filteredCategories = CATEGORIES.filter(
-    (c) =>
-      (type === "income" && ["salary", "freelance"].includes(c.id)) ||
-      (type === "expense" && !["salary", "freelance"].includes(c.id)),
-  )
+  // CORREÇÃO: Agora filtramos usando os IDs numéricos que estão no seu constants.ts
+  // ID 7 = Salário, ID 8 = Freelance
+  const filteredCategories = CATEGORIES.filter((c) => {
+    const isIncomeCategory = ["6", "7"].includes(c.id)
+    
+    if (type === "income") return isIncomeCategory
+    return !isIncomeCategory
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Nova Transacao</DialogTitle>
+          <DialogTitle>Nova Transação</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex gap-2">
             <Button
               variant={type === "income" ? "default" : "outline"}
-              onClick={() => setType("income")}
+              onClick={() => {
+                setType("income")
+                setCategory("") // Limpa a categoria ao trocar o tipo
+              }}
               className="flex-1"
             >
               Receita
             </Button>
             <Button
               variant={type === "expense" ? "default" : "outline"}
-              onClick={() => setType("expense")}
+              onClick={() => {
+                setType("expense")
+                setCategory("") // Limpa a categoria ao trocar o tipo
+              }}
               className="flex-1"
             >
               Despesa
@@ -86,7 +96,7 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
               <SelectContent>
                 {filteredCategories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
+                    <span className="mr-2">{cat.icon}</span> {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -94,17 +104,21 @@ export function TransactionModal({ open, onOpenChange, onSave }: TransactionModa
           </div>
 
           <div>
-            <label className="text-sm font-medium">Descricao</label>
+            <label className="text-sm font-medium">Descrição</label>
             <Input
-              placeholder="Para que foi essa transacao?"
+              placeholder="Para que foi essa transação?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="mt-1"
             />
           </div>
 
-          <Button onClick={handleSave} className="w-full">
-            Salvar Transacao
+          <Button 
+            onClick={handleSave} 
+            className="w-full"
+            disabled={!amount || !category || !description} // Desabilita se faltar dados
+          >
+            Salvar Transação
           </Button>
         </div>
       </DialogContent>

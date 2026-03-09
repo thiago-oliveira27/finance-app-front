@@ -17,8 +17,11 @@ export interface Transaction {
 }
 
 export interface FinancialData {
+  goals: any
+  budgets: any
   transactions: Transaction[]
   settings: {
+    hideValues: boolean | undefined
     currency: string
     theme: "light" | "dark"
   }

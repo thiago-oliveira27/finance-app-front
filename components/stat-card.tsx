@@ -3,33 +3,35 @@ import { Card } from "@/components/ui/card"
 
 interface StatCardProps {
   label: string
-  value: string | number
+  value: string
   icon?: ReactNode
-  trend?: number
+  trend?: string // Alterado de number para string
   color?: "green" | "red" | "blue" | "purple"
 }
 
 export function StatCard({ label, value, icon, trend, color = "blue" }: StatCardProps) {
-  const colorClasses = {
-    green: "text-green-600 dark:text-green-400",
-    red: "text-red-600 dark:text-red-400",
-    blue: "text-blue-600 dark:text-blue-400",
-    purple: "text-purple-600 dark:text-purple-400",
+  const colorMap = {
+    green: "text-emerald-500 bg-emerald-500/10",
+    red: "text-red-500 bg-red-500/10",
+    blue: "text-blue-500 bg-blue-500/10",
+    purple: "text-purple-500 bg-purple-500/10",
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold mt-2">{value}</p>
-          {trend !== undefined && (
-            <p className={`text-xs mt-2 ${trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}% em relacao ao mes anterior
-            </p>
-          )}
-        </div>
-        {icon && <div className={`text-3xl ${colorClasses[color]}`}>{icon}</div>}
+    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        {icon && <div className={`p-2 rounded-lg ${colorMap[color]}`}>{icon}</div>}
+      </div>
+      <div className="space-y-1">
+        <h3 className="text-2xl font-bold">{value}</h3>
+        {trend && (
+          <p className="text-xs text-muted-foreground">
+            <span className={trend.includes('+') ? "text-emerald-500" : "text-red-500"}>
+              {trend}
+            </span>
+          </p>
+        )}
       </div>
     </Card>
   )
